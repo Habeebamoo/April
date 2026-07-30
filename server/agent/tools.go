@@ -37,4 +37,106 @@ var ToolDefinitions = []map[string]any{
 			},
 		},
 	},
+	{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "get_recent_articles_on_clivo",
+			"description": "Get recently published articles on Clivo",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"limit": map[string]any{
+						"type":        "number",
+						"description": "How many articles to return, default 5",
+					},
+				},
+			},
+		},
+	},
+	{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "get_recent_signups_on_clivo",
+			"description": "Get users who recently signed up on Clivo",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"limit": map[string]any{
+						"type":        "number",
+						"description": "How many users to return, default 5",
+					},
+					"period": map[string]any{
+						"type":        "string",
+						"description": "Time period: today, week, or month",
+					},
+				},
+			},
+		},
+	},
+	{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "find_user_on_clivo",
+			"description": "Find a Clivo user by their name, email or username",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"query": map[string]any{
+						"type":        "string",
+						"description": "Name, email or username to search for",
+					},
+				},
+				"required": []string{"query"},
+			},
+		},
+	},
+	{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "create_comment_on_clivo",
+			"description": "Post a comment on a Clivo article on behalf of Habeeb",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"article_id": map[string]any{
+						"type":        "number",
+						"description": "ID of the article to comment on",
+					},
+					"content": map[string]any{
+						"type":        "string",
+						"description": "Comment content",
+					},
+				},
+				"required": []string{"article_id", "content"},
+			},
+		},
+	},
+	{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "get_subscribers_count_on_clivo",
+			"description": "Get total number of subscribers on Clivo",
+			"parameters": map[string]any{
+				"type":       "object",
+				"properties": map[string]any{},
+			},
+		},
+	},
+	{
+		"type": "function",
+		"function": map[string]any{
+			"name":        "get_user_social_stats_on_clivo",
+			"description": "Get followers and following count of a Clivo user",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"username": map[string]any{
+						"type":        "string",
+						"description": "Username of the user",
+					},
+				},
+				"required": []string{"username"},
+			},
+		},
+	},
 }
