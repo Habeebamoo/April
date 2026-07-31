@@ -94,7 +94,7 @@ var ToolDefinitions = []map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"article_id": map[string]any{
-						"type":        "number",
+						"type":        "string",
 						"description": "ID of the article to comment on",
 					},
 					"content": map[string]any{

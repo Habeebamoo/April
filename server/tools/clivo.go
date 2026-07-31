@@ -1,8 +1,12 @@
 package tools
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -203,27 +207,51 @@ func FindUser(input map[string]any) string {
 func CreateComment(input map[string]any) string {
 	articleID, ok1 := input["article_id"].(string)
 	content, ok2 := input["content"].(string)
-	userId, ok3 := input["user_id"].(string)
+	userID, ok3 := input["user_id"].(string)
 
 	if !ok1 || !ok2 || !ok3 || content == "" {
-		return "article_id and content are required"
+		return "article_id, user_id and content are required"
 	}
 
-	comment := Comment{
-		CommentId: "",
-		UserId: userId,
-		ArticleId: articleID,
-		Content:   content,
-		ReplyId: "",
-		Replys: 0,
+	payload := map[string]string{
+		"userId":    userID,
+		"articleId": articleID,
+		"content":   content,
 	}
 
-	result := db.ClivoDB.Table("comments").Create(&comment)
-	if result.Error != nil {
-		return fmt.Sprintf("Failed to create comment: %s", result.Error.Error())
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Sprintf("Failed to encode request: %v", err)
 	}
 
-	return fmt.Sprintf("Comment posted on article")
+	clivoApiUrl := fmt.Sprintf("%s/api/agent/comment", os.Getenv("CLIVO_API_URL"))
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		clivoApiUrl,
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		return fmt.Sprintf("Failed to create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", os.Getenv("CLIVO_AGENT_TOKEN"))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Sprintf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode >= 400 {
+		return fmt.Sprintf("API error (%d): %s", resp.StatusCode, string(respBody))
+	}
+
+	return "Comment posted on article"
 }
 
 // 6. Get subscribers count
