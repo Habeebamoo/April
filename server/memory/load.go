@@ -22,14 +22,14 @@ func Load() []string {
 	var memories []Memory
 	var sessions []Session
 
-	// Get last 20 memories
-	result := db.DB.Order("created_at desc").Limit(20).Find(&memories)
+	// Get last 10 memories
+	result := db.DB.Order("created_at desc").Limit(10).Find(&memories)
 	if result.Error != nil {
 		log.Println("Failed to load memories:", result.Error)
 	}
 
-	// Get last 10 session summaries
-	result = db.DB.Order("created_at desc").Limit(10).Find(&sessions)
+	// Get last 5 session summaries
+	result = db.DB.Order("created_at desc").Limit(5).Find(&sessions)
 	if result.Error != nil {
 		log.Println("Failed to load sessions:", result.Error)
 	}

@@ -42,6 +42,7 @@ type Article struct {
 	Slug       string         
 	CreatedAt  time.Time    
 }
+
 type Comment struct {
 	CommentId  string 
 	ArticleId  string  
@@ -74,15 +75,10 @@ func QueryClivoUsers() string {
 	return fmt.Sprintf("%d", count)
 }
 
-// 2. Get recent articles
-func GetRecentArticles(input map[string]any) string {
-	limit := 5
-	if l, ok := input["limit"].(float64); ok {
-		limit = int(l)
-	}
-
+// 2. Get all articles
+func GetArticles(input map[string]any) string {
 	var articles []Article
-	result := db.ClivoDB.Order("created_at desc").Limit(limit).Find(&articles)
+	result := db.ClivoDB.Order("created_at desc").Find(&articles)
 	if result.Error != nil {
 		return "Failed to fetch recent articles"
 	}
@@ -93,8 +89,19 @@ func GetRecentArticles(input map[string]any) string {
 
 	var lines []string
 	for _, a := range articles {
-		lines = append(lines, fmt.Sprintf("- [%d] %s (%s)", a.ArticleId, a.Title, a.CreatedAt.Format("Jan 2, 2006")))
+		lines = append(lines, fmt.Sprintf(
+			"- title: %s | id: %s | author_id: %s | slug: %s | picture: %s | read_time: %s | created: %s",
+			a.Title,
+			a.ArticleId,
+			a.AuthorId,
+			a.Slug,
+			a.Picture,
+			a.ReadTime,
+			a.CreatedAt.Format("Jan 2, 2006"),
+		))
 	}
+
+	
 	return fmt.Sprintf("Recent %d articles:\n%s", len(articles), strings.Join(lines, "\n"))
 }
 
@@ -152,12 +159,12 @@ func FindUser(input map[string]any) string {
 	search := "%" + strings.ToLower(query) + "%"
 
 	type Result struct {
-		UserID   uint
+		UserID   string
 		Name     string
 		Email    string
 		Username string
 		Verified bool
-		Banned   bool
+		IsBanned   bool
 	}
 
 	var results []Result
@@ -168,8 +175,9 @@ func FindUser(input map[string]any) string {
 		WHERE LOWER(u.name) LIKE ?
 		   OR LOWER(u.email) LIKE ?
 		   OR LOWER(p.username) LIKE ?
+			 OR LOWER(u.user_id) LIKE ?
 		LIMIT 5
-	`, search, search, search).Scan(&results)
+	`, search, search, search, search).Scan(&results)
 
 	if len(results) == 0 {
 		return fmt.Sprintf("No user found matching '%s'", query)
@@ -178,7 +186,7 @@ func FindUser(input map[string]any) string {
 	var lines []string
 	for _, r := range results {
 		status := "active"
-		if r.Banned {
+		if r.IsBanned {
 			status = "banned"
 		} else if !r.Verified {
 			status = "unverified"
@@ -195,14 +203,19 @@ func FindUser(input map[string]any) string {
 func CreateComment(input map[string]any) string {
 	articleID, ok1 := input["article_id"].(string)
 	content, ok2 := input["content"].(string)
+	userId, ok3 := input["user_id"].(string)
 
-	if !ok1 || !ok2 || content == "" {
+	if !ok1 || !ok2 || !ok3 || content == "" {
 		return "article_id and content are required"
 	}
 
 	comment := Comment{
+		CommentId: "",
+		UserId: userId,
 		ArticleId: articleID,
 		Content:   content,
+		ReplyId: "",
+		Replys: 0,
 	}
 
 	result := db.ClivoDB.Table("comments").Create(&comment)
@@ -233,8 +246,8 @@ func GetUserSocialStats(input map[string]any) string {
 	// Find the profile
 	var profile Profile
 	result := db.ClivoDB.
-		Where("LOWER(username) = ?", strings.ToLower(username)).
-		First(&profile)
+			Where("LOWER(username) LIKE ?", "%"+strings.ToLower(username)+"%").
+			First(&profile)
 
 	if result.Error != nil {
 		return fmt.Sprintf("User @%s not found", username)

@@ -40,16 +40,11 @@ var ToolDefinitions = []map[string]any{
 	{
 		"type": "function",
 		"function": map[string]any{
-			"name":        "get_recent_articles_on_clivo",
-			"description": "Get recently published articles on Clivo",
+			"name":        "get_articles_on_clivo",
+			"description": "Get all published articles on Clivo",
 			"parameters": map[string]any{
 				"type": "object",
-				"properties": map[string]any{
-					"limit": map[string]any{
-						"type":        "number",
-						"description": "How many articles to return, default 5",
-					},
-				},
+				"properties": map[string]any{},
 			},
 		},
 	},
@@ -106,8 +101,12 @@ var ToolDefinitions = []map[string]any{
 						"type":        "string",
 						"description": "Comment content",
 					},
+					"user_id": map[string]any{
+						"type": "string",
+						"description": "The user that you will create the comment on behalf of. DEFAULT: always use the user_id associated with @habeebamoo08",
+					},
 				},
-				"required": []string{"article_id", "content"},
+				"required": []string{"article_id", "content", "user_id"},
 			},
 		},
 	},
