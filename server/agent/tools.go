@@ -138,4 +138,21 @@ var ToolDefinitions = []map[string]any{
 			},
 		},
 	},
+	{
+    "type": "function",
+    "function": map[string]any{
+			"name":        "web_search",
+			"description": "Search the internet for any current information, news, facts or anything April doesn't already know",
+			"parameters": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"query": map[string]any{
+							"type":        "string",
+							"description": "The search query",
+					},
+				},
+				"required": []string{"query"},
+			},
+    },
+	},
 }
