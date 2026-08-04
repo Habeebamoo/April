@@ -24,6 +24,8 @@ func ExecuteTool(toolName string, input map[string]any) string {
 		return tools.GetSubscribersCount()
 	case "get_user_social_stats_on_clivo":
 		return tools.GetUserSocialStats(input)
+	case "web_search":
+    return tools.WebSearch(input)
 	default:
 		return fmt.Sprintf("Unknown tool: %s", toolName)
 	}
